@@ -1,0 +1,37 @@
+.wrap {
+  display: inline-flex;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--surface);
+}
+
+.btn {
+  padding: 6px 12px;
+  border: none;
+  background: transparent;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-muted);
+  cursor: pointer;
+  letter-spacing: 0.04em;
+}
+
+.btn:hover {
+  background: var(--hover);
+  color: var(--text);
+}
+
+.active {
+  background: var(--accent);
+  color: #fff;
+}
+
+.active:hover {
+  background: var(--accent);
+  color: #fff;
+}
+
+.busy {
+  opacity: 0.85;
+}

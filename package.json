@@ -1,0 +1,27 @@
+{
+  "name": "iris-tasks",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "node scripts/dev.mjs",
+    "dev:fast": "next dev -p 3000",
+    "dev:clean": "node scripts/dev.mjs",
+    "start:clean": "node -e \"try{require('fs').rmSync('.next',{recursive:true,force:true})}catch(e){}\" && next build && next start",
+    "build": "node scripts/build.mjs",
+    "start": "next start",
+    "lint": "next lint",
+    "setup:storage": "node scripts/setup-task-images.mjs"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.49.1",
+    "next": "15.2.4",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "typescript": "^5"
+  }
+}

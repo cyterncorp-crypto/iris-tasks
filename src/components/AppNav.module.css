@@ -1,0 +1,31 @@
+.nav {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  flex: 1;
+}
+
+.localeToggle {
+  margin-left: auto;
+}
+
+.link {
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: background 0.15s, color 0.15s;
+}
+
+.link:hover {
+  background: var(--hover);
+  color: var(--text);
+}
+
+.active {
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
