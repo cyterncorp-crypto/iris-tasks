@@ -3,12 +3,56 @@ import { NextResponse } from "next/server";
 const CACHE = new Map<string, string>();
 const MAX_CHUNK = 480;
 
-function isValidTranslation(original: string, translated: string | undefined): boolean {
+function hasCyrillic(text: string): boolean {
+  return /[А-Яа-яЁё]/.test(text);
+}
+
+function hasTranslatableLatinText(text: string): boolean {
+  const cleaned = text
+    .replace(/https?:\/\/\S+/g, " ")
+    .replace(/[*_`#>\-[\](){}.,:;!?/\\|]+/g, " ");
+
+  const ignored = new Set([
+    "instagram",
+    "tiktok",
+    "telegram",
+    "sayyo",
+    "private",
+    "content",
+    "exclusive",
+    "official",
+    "giveaway",
+    "link",
+    "bio",
+  ]);
+
+  const words = cleaned.match(/[A-Za-zÀ-ÿ]{3,}/g) ?? [];
+  return words.some((word) => !ignored.has(word.toLowerCase()));
+}
+
+function normalizeBrandNames(text: string): string {
+  return text
+    .replace(/Телеграмма/giu, "Telegram")
+    .replace(/Телеграм/giu, "Telegram")
+    .replace(/Инстаграм(?:а|е|ом)?/giu, "Instagram")
+    .replace(/Тик\s?Ток/giu, "TikTok")
+    .replace(/Сайё/giu, "Sayyo")
+    .replace(/Сайо/giu, "Sayyo");
+}
+
+function isValidTranslation(
+  original: string,
+  translated: string | undefined,
+  target: "ru"
+): boolean {
   if (!translated?.trim()) return false;
   const lower = translated.toLowerCase();
   if (lower.includes("mymemory warning")) return false;
   if (lower.includes("query length limit")) return false;
   if (lower.includes("invalid source")) return false;
+  if (target === "ru" && hasTranslatableLatinText(original) && !hasCyrillic(translated)) {
+    return false;
+  }
   return true;
 }
 
@@ -28,7 +72,8 @@ async function translateWithMyMemory(text: string, target: "ru"): Promise<string
   if (data.responseStatus === 429) return null;
 
   const translated = data.responseData?.translatedText?.trim();
-  return isValidTranslation(text, translated) ? translated! : null;
+  const normalized = translated ? normalizeBrandNames(translated) : translated;
+  return isValidTranslation(text, normalized, target) ? normalized! : null;
 }
 
 async function translateWithLingva(text: string, target: "ru"): Promise<string | null> {
@@ -38,7 +83,8 @@ async function translateWithLingva(text: string, target: "ru"): Promise<string |
 
   const data = (await res.json()) as { translation?: string };
   const translated = data.translation?.trim();
-  return isValidTranslation(text, translated) ? translated! : null;
+  const normalized = translated ? normalizeBrandNames(translated) : translated;
+  return isValidTranslation(text, normalized, target) ? normalized! : null;
 }
 
 async function translateWithGoogle(text: string, target: "ru"): Promise<string | null> {
@@ -54,7 +100,8 @@ async function translateWithGoogle(text: string, target: "ru"): Promise<string |
     .join("")
     .trim();
 
-  return isValidTranslation(text, translated) ? translated : null;
+  const normalized = normalizeBrandNames(translated);
+  return isValidTranslation(text, normalized, target) ? normalized : null;
 }
 
 async function translateSegment(text: string, target: "ru"): Promise<string> {
@@ -63,9 +110,9 @@ async function translateSegment(text: string, target: "ru"): Promise<string> {
   if (cached) return cached;
 
   const providers = [
-    () => translateWithMyMemory(text, target),
-    () => translateWithLingva(text, target),
     () => translateWithGoogle(text, target),
+    () => translateWithLingva(text, target),
+    () => translateWithMyMemory(text, target),
   ];
 
   for (const provider of providers) {
