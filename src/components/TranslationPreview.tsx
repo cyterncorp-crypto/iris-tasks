@@ -23,7 +23,14 @@ export default function TranslationPreview({
 
   useEffect(() => {
     if (!trimmed || locale === "pt") return;
-    void translateTexts(expandTextsForTranslation([trimmed]), true);
+
+    const timer = setTimeout(() => {
+      void translateTexts(expandTextsForTranslation([trimmed]), true, {
+        immediate: true,
+      });
+    }, 250);
+
+    return () => clearTimeout(timer);
   }, [trimmed, locale, translateTexts]);
 
   if (locale === "pt" || !trimmed) return null;

@@ -26,7 +26,11 @@ type LocaleContextValue = {
   setLocale: (locale: Locale) => void;
   t: (key: MessageKey, vars?: Record<string, string | number>) => string;
   td: (text: string) => string;
-  translateTexts: (texts: string[], force?: boolean) => Promise<string[]>;
+  translateTexts: (
+    texts: string[],
+    force?: boolean,
+    options?: { immediate?: boolean }
+  ) => Promise<string[]>;
   subscribeLocalePrefetch: (fn: () => void) => () => void;
   translating: boolean;
 };
@@ -176,7 +180,15 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
       }
     } finally {
       flushingRef.current = false;
-      setTranslating(false);
+      if (queueRef.current.size > 0 || pendingRef.current.length > 0) {
+        if (flushTimerRef.current) clearTimeout(flushTimerRef.current);
+        flushTimerRef.current = setTimeout(() => {
+          flushTimerRef.current = null;
+          void flushQueue();
+        }, FLUSH_DELAY_MS);
+      } else {
+        setTranslating(false);
+      }
     }
   }, []);
 
@@ -189,10 +201,34 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
   }, [flushQueue]);
 
   const translateTexts = useCallback(
-    (texts: string[], force = false) => {
+    (texts: string[], force = false, options?: { immediate?: boolean }) => {
       const cleaned = texts.filter((t) => typeof t === "string" && t.trim());
       if (cleaned.length === 0) return Promise.resolve(texts);
       if (!force && localeRef.current === "pt") return Promise.resolve(texts);
+
+      if (options?.immediate) {
+        setTranslating(true);
+        return fetchTranslationsFromApi(cleaned)
+          .then(() =>
+            texts.map((text) => {
+              const trimmed = text.trim();
+              return (
+                dynamicCache.get(`ru|${trimmed}`) ??
+                dynamicCache.get(`ru|${text}`) ??
+                text
+              );
+            })
+          )
+          .finally(() => {
+            if (
+              !flushingRef.current &&
+              queueRef.current.size === 0 &&
+              pendingRef.current.length === 0
+            ) {
+              setTranslating(false);
+            }
+          });
+      }
 
       for (const text of cleaned) {
         queueRef.current.add(text);

@@ -126,6 +126,20 @@ export default function TaskChecklist({ items, onChange, disabled }: Props) {
     }
   }, [locale, items, translateTexts]);
 
+  useEffect(() => {
+    if (locale !== "ru") return;
+    const text = newText.trim();
+    if (!text) return;
+
+    const timer = setTimeout(() => {
+      void translateTexts(expandTextsForTranslation([text]), true, {
+        immediate: true,
+      });
+    }, 250);
+
+    return () => clearTimeout(timer);
+  }, [locale, newText, translateTexts]);
+
   const doneCount = items.filter((i) => i.done).length;
   const progress = checklistProgress(items);
 
