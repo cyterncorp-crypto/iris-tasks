@@ -13,6 +13,7 @@ import {
 import type { Task, TaskTag, TaskUpdate } from "@/lib/types";
 import { useT } from "@/lib/i18n/LocaleProvider";
 import TranslatedText from "./TranslatedText";
+import TranslationPreview from "./TranslationPreview";
 import styles from "./TaskTagEditor.module.css";
 
 interface Props {
@@ -201,15 +202,21 @@ export default function TaskTagEditor({ task, onUpdate }: Props) {
             customColorLabel={t("customColor")}
           />
           {tag.label.trim() && (
-            <span
-              className={styles.tagPreview}
-              style={{
-                background: tag.color || DEFAULT_TAG_COLOR,
-                color: tagTextColor(tag.color || DEFAULT_TAG_COLOR),
-              }}
-            >
-              <TranslatedText text={tag.label.trim()} />
-            </span>
+            <>
+              <span
+                className={styles.tagPreview}
+                style={{
+                  background: tag.color || DEFAULT_TAG_COLOR,
+                  color: tagTextColor(tag.color || DEFAULT_TAG_COLOR),
+                }}
+              >
+                <TranslatedText text={tag.label.trim()} />
+              </span>
+              <TranslationPreview
+                text={tag.label.trim()}
+                className={styles.translationPreview}
+              />
+            </>
           )}
         </div>
       ))}

@@ -88,6 +88,17 @@
   align-items: flex-end;
 }
 
+.translationPreview {
+  flex-basis: 100%;
+  padding: 8px 10px;
+  border-left: 3px solid var(--accent);
+  border-radius: 8px;
+  background: #f8fafc;
+  color: var(--text);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
 .input {
   flex: 1;
   min-width: 200px;

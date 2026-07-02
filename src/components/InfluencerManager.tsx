@@ -12,6 +12,7 @@ import {
 import { buildUniqueSlug, getInfluencerProfilePath, slugifyName } from "@/lib/influencer-slug";
 import { useT } from "@/lib/i18n/LocaleProvider";
 import TranslatedText from "./TranslatedText";
+import TranslationPreview from "./TranslationPreview";
 import AppNav from "./AppNav";
 import PhotoUpload from "./PhotoUpload";
 import styles from "./InfluencerManager.module.css";
@@ -236,6 +237,10 @@ export default function InfluencerManager() {
             onChange={(e) => setName(e.target.value)}
             required
           />
+          <TranslationPreview
+            text={name}
+            className={styles.translationPreview}
+          />
           <PhotoUpload key={photoKey} onFileSelect={setPhotoFile} />
           <button className={styles.submitBtn} type="submit" disabled={saving}>
             {saving ? t("saving") : t("createInfluencer")}
@@ -264,6 +269,10 @@ export default function InfluencerManager() {
                       className={styles.input}
                       value={editName}
                       onChange={(e) => setEditName(e.target.value)}
+                    />
+                    <TranslationPreview
+                      text={editName}
+                      className={styles.translationPreview}
                     />
                     <PhotoUpload
                       currentUrl={editCurrentPhoto}

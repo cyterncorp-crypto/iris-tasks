@@ -26,6 +26,7 @@ import type { DisplayStatus } from "@/lib/types";
 import { useT } from "@/lib/i18n/LocaleProvider";
 import { expandTextsForTranslation } from "@/lib/translate-text";
 import TranslatedText from "./TranslatedText";
+import TranslationPreview from "./TranslationPreview";
 import TaskChecklist from "./TaskChecklist";
 import styles from "./TaskDetailModal.module.css";
 
@@ -296,34 +297,40 @@ export default function TaskDetailModal({
             <TranslatedText text={title} />
           </button>
         ) : (
-          <input
-            ref={titleRef}
-            id="task-detail-title"
-            className={styles.titleInput}
-            value={title}
-            disabled={busy}
-            autoFocus={editingTitle && locale === "ru"}
-            onChange={(e) => setTitle(e.target.value)}
-            onBlur={() => {
-              saveTitle();
-              setEditingTitle(false);
-            }}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                e.preventDefault();
+          <div className={styles.titleEditWrap}>
+            <input
+              ref={titleRef}
+              id="task-detail-title"
+              className={styles.titleInput}
+              value={title}
+              disabled={busy}
+              autoFocus={editingTitle && locale === "ru"}
+              onChange={(e) => setTitle(e.target.value)}
+              onBlur={() => {
                 saveTitle();
                 setEditingTitle(false);
-                (e.target as HTMLInputElement).blur();
-              }
-              if (e.key === "Escape") {
-                e.stopPropagation();
-                setTitle(task.title);
-                setEditingTitle(false);
-                (e.target as HTMLInputElement).blur();
-              }
-            }}
-            placeholder={t("taskDetailPlaceholder")}
-          />
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  saveTitle();
+                  setEditingTitle(false);
+                  (e.target as HTMLInputElement).blur();
+                }
+                if (e.key === "Escape") {
+                  e.stopPropagation();
+                  setTitle(task.title);
+                  setEditingTitle(false);
+                  (e.target as HTMLInputElement).blur();
+                }
+              }}
+              placeholder={t("taskDetailPlaceholder")}
+            />
+            <TranslationPreview
+              text={title}
+              className={styles.translationPreview}
+            />
+          </div>
         )}
 
         <div className={styles.influencerRow}>

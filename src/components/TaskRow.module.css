@@ -56,6 +56,19 @@
   outline: none;
 }
 
+.titleEditWrap {
+  flex: 1;
+  min-width: 0;
+}
+
+.translationPreview {
+  margin-top: 4px;
+  color: var(--text-muted);
+  font-size: 13px;
+  line-height: 1.35;
+  white-space: normal;
+}
+
 .titleInput:focus,
 .fieldInput:focus {
   border-color: var(--accent);

@@ -172,6 +172,13 @@
   font-weight: 700;
 }
 
+.translationPreview {
+  margin-top: 6px;
+  font-size: 12px;
+  line-height: 1.35;
+  color: var(--text-muted);
+}
+
 .addRowBtn {
   display: block;
   width: 100%;

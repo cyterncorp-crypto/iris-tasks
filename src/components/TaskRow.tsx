@@ -14,6 +14,7 @@ import {
 } from "@/lib/task-utils";
 import { useT } from "@/lib/i18n/LocaleProvider";
 import TranslatedText from "./TranslatedText";
+import TranslationPreview from "./TranslationPreview";
 import TaskTagEditor from "./TaskTagEditor";
 import styles from "./TaskRow.module.css";
 
@@ -92,22 +93,27 @@ export default function TaskRow({
             style={{ background: STATUS_COLORS[display] }}
           />
           {editingTitle ? (
-            <input
-              ref={titleRef}
-              className={styles.titleInput}
-              value={titleDraft}
-              onChange={(e) => setTitleDraft(e.target.value)}
-              onBlur={saveTitle}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") saveTitle();
-                if (e.key === "Escape") {
-                  setTitleDraft(task.title);
-                  setEditingTitle(false);
-                }
-              }}
-              onClick={stop}
-              placeholder={t("taskNamePlaceholder")}
-            />
+            <div className={styles.titleEditWrap} onClick={stop}>
+              <input
+                ref={titleRef}
+                className={styles.titleInput}
+                value={titleDraft}
+                onChange={(e) => setTitleDraft(e.target.value)}
+                onBlur={saveTitle}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") saveTitle();
+                  if (e.key === "Escape") {
+                    setTitleDraft(task.title);
+                    setEditingTitle(false);
+                  }
+                }}
+                placeholder={t("taskNamePlaceholder")}
+              />
+              <TranslationPreview
+                text={titleDraft}
+                className={styles.translationPreview}
+              />
+            </div>
           ) : (
             <span
               className={styles.taskName}
