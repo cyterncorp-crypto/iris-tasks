@@ -53,6 +53,8 @@ export default function TaskBoard({
   const [copyToAllInfluencers, setCopyToAllInfluencers] = useState(false);
   const [success, setSuccess] = useState<string | null>(null);
   const [dateFilter, setDateFilter] = useState<"principal" | "geral" | string>("principal");
+  const [ruPreparing, setRuPreparing] = useState(false);
+  const [ruReadySignature, setRuReadySignature] = useState("");
 
   const fetchData = useCallback(async () => {
     setError(null);
@@ -96,16 +98,22 @@ export default function TaskBoard({
   }, [fetchData]);
 
   const tasksRef = useRef(tasks);
-  const influencersRef = useRef(influencers);
   tasksRef.current = tasks;
-  influencersRef.current = influencers;
+
+  const boardTranslationTexts = useMemo(
+    () => collectTranslatableTexts(tasks),
+    [tasks]
+  );
+  const boardTranslationSignature = useMemo(
+    () => boardTranslationTexts.join("\u0001"),
+    [boardTranslationTexts]
+  );
 
   const prefetchAllTexts = useCallback(() => {
-    const texts = collectTranslatableTexts(
-      tasksRef.current,
-      influencersRef.current
-    );
-    if (texts.length > 0) void translateTexts(texts, true);
+    const texts = collectTranslatableTexts(tasksRef.current);
+    if (texts.length > 0) {
+      void translateTexts(texts, true, { immediate: true });
+    }
   }, [translateTexts]);
 
   useEffect(() => {
@@ -121,7 +129,41 @@ export default function TaskBoard({
   useEffect(() => {
     if (locale !== "ru" || loading) return;
     prefetchAllTexts();
-  }, [locale, tasks, influencers, loading, prefetchAllTexts]);
+  }, [locale, tasks, loading, prefetchAllTexts]);
+
+  useEffect(() => {
+    if (locale !== "ru" || loading) {
+      setRuPreparing(false);
+      return;
+    }
+
+    if (!boardTranslationSignature) {
+      setRuReadySignature("");
+      setRuPreparing(false);
+      return;
+    }
+
+    let active = true;
+    setRuPreparing(true);
+
+    void translateTexts(boardTranslationTexts, true, { immediate: true })
+      .then(() => {
+        if (active) setRuReadySignature(boardTranslationSignature);
+      })
+      .finally(() => {
+        if (active) setRuPreparing(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [
+    locale,
+    loading,
+    boardTranslationTexts,
+    boardTranslationSignature,
+    translateTexts,
+  ]);
 
   const updateTask = useCallback(
     async (id: string, updates: TaskUpdate) => {
@@ -294,11 +336,8 @@ export default function TaskBoard({
           checklist.some((item) => td(item.text).toLowerCase().includes(q)));
 
       const influencerName = getInfluencerName(t);
-      const influencerRu =
-        locale === "ru" && influencerName ? td(influencerName).toLowerCase() : "";
       const influencerMatch =
-        (influencerName?.toLowerCase().includes(q) ?? false) ||
-        influencerRu.includes(q);
+        influencerName?.toLowerCase().includes(q) ?? false;
 
       const tagMatch = getTaskTags(t).some((tag) => {
         const label = tag.label.toLowerCase();
@@ -334,6 +373,34 @@ export default function TaskBoard({
           </div>
         </header>
         <div className={styles.loading}>{t("loadingTasks")}</div>
+      </div>
+    );
+  }
+
+  const waitingForRussian =
+    locale === "ru" &&
+    !!boardTranslationSignature &&
+    (ruPreparing || ruReadySignature !== boardTranslationSignature);
+
+  if (waitingForRussian) {
+    return (
+      <div className={styles.page}>
+        <header className={styles.header}>
+          <div className={styles.headerLeft}>
+            <div>
+              <h1 className={styles.title}>{title}</h1>
+              {subtitle && <p className={styles.subtitle}>{subtitle}</p>}
+            </div>
+            <AppNav />
+          </div>
+        </header>
+        <div className={styles.translationLoading}>
+          <div className={styles.translationSpinner} aria-hidden />
+          <div>
+            <p className={styles.translationTitle}>Подготавливаем русский интерфейс</p>
+            <p className={styles.translationHint}>Задачи появятся после завершения перевода.</p>
+          </div>
+        </div>
       </div>
     );
   }

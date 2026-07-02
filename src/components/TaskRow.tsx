@@ -35,7 +35,7 @@ export default function TaskRow({
   onOpen,
   onDelete,
 }: Props) {
-  const { t, td, locale } = useT();
+  const { t, locale } = useT();
   const [editingDate, setEditingDate] = useState(false);
   const [editingTitle, setEditingTitle] = useState(false);
   const [titleDraft, setTitleDraft] = useState(task.title);
@@ -153,7 +153,7 @@ export default function TaskRow({
               <option value="">{t("none")}</option>
               {influencers.map((inf) => (
                 <option key={inf.id} value={inf.id}>
-                  {td(inf.name)}
+                  {inf.name}
                 </option>
               ))}
             </select>

@@ -11,8 +11,6 @@ import {
 } from "@/lib/upload-photo";
 import { buildUniqueSlug, getInfluencerProfilePath, slugifyName } from "@/lib/influencer-slug";
 import { useT } from "@/lib/i18n/LocaleProvider";
-import TranslatedText from "./TranslatedText";
-import TranslationPreview from "./TranslationPreview";
 import AppNav from "./AppNav";
 import PhotoUpload from "./PhotoUpload";
 import styles from "./InfluencerManager.module.css";
@@ -22,7 +20,7 @@ interface InfluencerWithCount extends Influencer {
 }
 
 export default function InfluencerManager() {
-  const { t, locale, translateTexts } = useT();
+  const { t } = useT();
   const [influencers, setInfluencers] = useState<InfluencerWithCount[]>([]);
   const [name, setName] = useState("");
   const [photoFile, setPhotoFile] = useState<File | null>(null);
@@ -96,12 +94,6 @@ export default function InfluencerManager() {
   useEffect(() => {
     checkStorageAvailable().then(setStorageOk);
   }, []);
-
-  useEffect(() => {
-    if (locale !== "ru" || loading) return;
-    const names = influencers.map((inf) => inf.name).filter((n) => n?.trim());
-    if (names.length > 0) void translateTexts(names, true);
-  }, [locale, loading, influencers, translateTexts]);
 
   const createInfluencer = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -237,10 +229,6 @@ export default function InfluencerManager() {
             onChange={(e) => setName(e.target.value)}
             required
           />
-          <TranslationPreview
-            text={name}
-            className={styles.translationPreview}
-          />
           <PhotoUpload key={photoKey} onFileSelect={setPhotoFile} />
           <button className={styles.submitBtn} type="submit" disabled={saving}>
             {saving ? t("saving") : t("createInfluencer")}
@@ -269,10 +257,6 @@ export default function InfluencerManager() {
                       className={styles.input}
                       value={editName}
                       onChange={(e) => setEditName(e.target.value)}
-                    />
-                    <TranslationPreview
-                      text={editName}
-                      className={styles.translationPreview}
                     />
                     <PhotoUpload
                       currentUrl={editCurrentPhoto}
@@ -307,7 +291,7 @@ export default function InfluencerManager() {
                         </span>
                       )}
                       <div className={styles.cardInfo}>
-                        <TranslatedText text={inf.name} className={styles.cardName} />
+                        <span className={styles.cardName}>{inf.name}</span>
                         <span className={styles.cardCount}>
                           {t("taskCount", { count: inf.task_count })}
                         </span>

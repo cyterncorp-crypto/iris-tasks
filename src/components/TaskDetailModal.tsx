@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { ChecklistItem, Influencer, Task, TaskUpdate } from "@/lib/types";
 import { getInfluencerName, getInfluencerPhoto } from "@/lib/types";
 import {
@@ -53,7 +53,7 @@ export default function TaskDetailModal({
   onUpdate,
   onCopy,
 }: Props) {
-  const { t, td, locale, translateTexts } = useT();
+  const { t, locale, translateTexts } = useT();
   const [title, setTitle] = useState(task.title);
   const [checklist, setChecklist] = useState<ChecklistItem[]>(() => getTaskChecklist(task));
   const [images, setImages] = useState<string[]>(() => getTaskImages(task));
@@ -73,18 +73,46 @@ export default function TaskDetailModal({
   const influencerPhoto = getInfluencerPhoto(task);
 
   const copyTargets = influencers.filter((inf) => inf.id !== task.influencer_id);
+  const detailTranslationTexts = useMemo(() => {
+    const texts = [
+      task.title,
+      task.description ?? "",
+      ...checklist.map((item) => item.text),
+    ].filter((s) => s?.trim()) as string[];
+
+    return expandTextsForTranslation(texts);
+  }, [task.title, task.description, checklist]);
+  const detailTranslationSignature = useMemo(
+    () => detailTranslationTexts.join("\u0001"),
+    [detailTranslationTexts]
+  );
+  const [ruPreparing, setRuPreparing] = useState(false);
+  const [ruReadySignature, setRuReadySignature] = useState("");
 
   useEffect(() => {
     if (locale !== "ru") return;
-    const texts = [
-      task.title,
-      title,
-      task.description ?? "",
-      ...checklist.map((item) => item.text),
-      ...copyTargets.map((inf) => inf.name),
-    ].filter((s) => s?.trim()) as string[];
-    if (texts.length > 0) void translateTexts(expandTextsForTranslation(texts), true);
-  }, [locale, task.title, task.description, title, checklist, copyTargets, translateTexts]);
+    if (!detailTranslationSignature) return;
+
+    let active = true;
+    setRuPreparing(true);
+
+    void translateTexts(detailTranslationTexts, true, { immediate: true })
+      .then(() => {
+        if (active) setRuReadySignature(detailTranslationSignature);
+      })
+      .finally(() => {
+        if (active) setRuPreparing(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [
+    locale,
+    detailTranslationTexts,
+    detailTranslationSignature,
+    translateTexts,
+  ]);
 
   useEffect(() => {
     if (locale === "pt") {
@@ -268,6 +296,34 @@ export default function TaskDetailModal({
   const derivedStatus = deriveStatusFromChecklist(checklist);
   const displayStatus = derivedStatus ?? getDisplayStatus(task);
   const busy = saving || uploading || copying;
+  const waitingForRussian =
+    locale === "ru" &&
+    !!detailTranslationSignature &&
+    (ruPreparing || ruReadySignature !== detailTranslationSignature);
+
+  if (waitingForRussian) {
+    return (
+      <div className={styles.overlay} onClick={onClose}>
+        <div
+          className={styles.card}
+          onClick={(e) => e.stopPropagation()}
+          role="dialog"
+          aria-modal="true"
+        >
+          <button type="button" className={styles.closeBtn} onClick={onClose} aria-label={t("close")}>
+            ×
+          </button>
+          <div className={styles.translationLoading}>
+            <div className={styles.translationSpinner} aria-hidden />
+            <div>
+              <p className={styles.translationTitle}>Подготавливаем перевод задачи</p>
+              <p className={styles.translationHint}>Содержимое появится на русском языке.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.overlay} onClick={onClose}>
@@ -341,7 +397,7 @@ export default function TaskDetailModal({
           )}
           <span className={styles.influencerName}>
             {influencerName ? (
-              <TranslatedText text={influencerName} />
+              influencerName
             ) : (
               t("noInfluencer")
             )}
@@ -457,7 +513,7 @@ export default function TaskDetailModal({
                 <option value="">{t("chooseInfluencer")}</option>
                 {copyTargets.map((inf) => (
                   <option key={inf.id} value={inf.id}>
-                    {td(inf.name)}
+                    {inf.name}
                   </option>
                 ))}
               </select>
