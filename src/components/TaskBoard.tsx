@@ -31,6 +31,7 @@ interface TaskBoardProps {
   title?: string;
   subtitle?: string;
   hideInfluencerColumns?: boolean;
+  influencerView?: boolean;
   onTasksChange?: (tasks: Task[]) => void;
 }
 
@@ -39,6 +40,7 @@ export default function TaskBoard({
   title = "Sayyo Tasks",
   subtitle,
   hideInfluencerColumns = false,
+  influencerView = false,
   onTasksChange,
 }: TaskBoardProps) {
   const { t, td, locale, translateTexts, subscribeLocalePrefetch } = useT();
@@ -55,6 +57,7 @@ export default function TaskBoard({
   const [dateFilter, setDateFilter] = useState<"principal" | "geral" | string>("principal");
   const [ruPreparing, setRuPreparing] = useState(false);
   const [ruReadySignature, setRuReadySignature] = useState("");
+  const [dateFilterExpanded, setDateFilterExpanded] = useState(false);
 
   const fetchData = useCallback(async () => {
     setError(null);
@@ -319,10 +322,12 @@ export default function TaskBoard({
   }, [tasks]);
 
   const filtered = useMemo(() => {
-    const q = search.toLowerCase().trim();
     return tasks.filter((t) => {
       if (!isAllTasksFilter(dateFilter) && t.due_date !== dateFilter) return false;
       if (!showClosed && t.status === "feito") return false;
+      if (influencerView) return true;
+
+      const q = search.toLowerCase().trim();
       if (!q) return true;
 
       const titleRu = locale === "ru" ? td(t.title).toLowerCase() : "";
@@ -347,31 +352,79 @@ export default function TaskBoard({
 
       return titleMatch || checklistMatch || influencerMatch || tagMatch;
     });
-  }, [tasks, search, showClosed, dateFilter, locale, td]);
+  }, [tasks, search, showClosed, dateFilter, locale, td, influencerView]);
 
   const groupedByDate = useMemo(
     () => groupTasksByDueDate(filtered),
     [filtered]
   );
 
+  const activeDateFilterLabel = useMemo(() => {
+    if (dateFilter === "principal") return t("principal");
+    if (dateFilter === "geral") return t("general");
+    return formatFilterDayLabel(dateFilter, locale);
+  }, [dateFilter, locale, t]);
+
+  const selectDateFilter = (value: typeof dateFilter) => {
+    setDateFilter(value);
+    if (influencerView) setDateFilterExpanded(false);
+  };
+
+  const pageClass = influencerView ? `${styles.page} ${styles.pageInfluencer}` : styles.page;
+
+  const dateFilterTabs = (
+    <>
+      <button
+        type="button"
+        className={`${styles.dateFilterTab} ${dateFilter === "principal" ? styles.dateFilterTabActive : ""}`}
+        onClick={() => selectDateFilter("principal")}
+      >
+        {t("principal")}
+        <span className={styles.dateFilterCount}>{tasks.length}</span>
+      </button>
+      <button
+        type="button"
+        className={`${styles.dateFilterTab} ${dateFilter === "geral" ? styles.dateFilterTabActive : ""}`}
+        onClick={() => selectDateFilter("geral")}
+      >
+        {t("general")}
+        <span className={styles.dateFilterCount}>{tasks.length}</span>
+      </button>
+      {availableDays.length > 0 && <span className={styles.dateFilterDivider} />}
+      {availableDays.map((day) => (
+        <button
+          key={day}
+          type="button"
+          className={`${styles.dateFilterTab} ${dateFilter === day ? styles.dateFilterTabActive : ""}`}
+          onClick={() => selectDateFilter(day)}
+        >
+          {formatFilterDayLabel(day, locale)}
+          <span className={styles.dateFilterCount}>{dayCounts.get(day) ?? 0}</span>
+        </button>
+      ))}
+    </>
+  );
+
   if (loading) {
     return (
-      <div className={styles.page}>
-        <header className={styles.header}>
-          <div className={styles.headerLeft}>
-            <div>
-              <h1 className={styles.title}>
-                {title === "Sayyo Tasks" ? (
-                  displayTitle
-                ) : (
-                  <TranslatedText text={displayTitle} />
-                )}
-              </h1>
-              {subtitle && <p className={styles.subtitle}>{subtitle}</p>}
+      <div className={pageClass}>
+        {!influencerView && (
+          <header className={styles.header}>
+            <div className={styles.headerLeft}>
+              <div>
+                <h1 className={styles.title}>
+                  {title === "Sayyo Tasks" ? (
+                    displayTitle
+                  ) : (
+                    <TranslatedText text={displayTitle} />
+                  )}
+                </h1>
+                {subtitle && <p className={styles.subtitle}>{subtitle}</p>}
+              </div>
+              <AppNav />
             </div>
-            <AppNav />
-          </div>
-        </header>
+          </header>
+        )}
         <div className={styles.loading}>{t("loadingTasks")}</div>
       </div>
     );
@@ -406,28 +459,32 @@ export default function TaskBoard({
   }
 
   return (
-    <div className={styles.page}>
-      <header className={styles.header}>
-        <div className={styles.headerLeft}>
-          <div>
-            <h1 className={styles.title}>{title}</h1>
-            {subtitle && <p className={styles.subtitle}>{subtitle}</p>}
+    <div className={pageClass}>
+      {!influencerView && (
+        <header className={styles.header}>
+          <div className={styles.headerLeft}>
+            <div>
+              <h1 className={styles.title}>{title}</h1>
+              {subtitle && <p className={styles.subtitle}>{subtitle}</p>}
+            </div>
+            <AppNav />
           </div>
-          <AppNav />
-        </div>
-        <div className={styles.headerRight}>
-          <input
-            className={styles.search}
-            placeholder={t("searchTasks")}
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-          <span className={styles.badge}>{t("groupByDueDate")}</span>
-        </div>
-      </header>
+          <div className={styles.headerRight}>
+            <input
+              className={styles.search}
+              placeholder={t("searchTasks")}
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+            <span className={styles.badge}>{t("groupByDueDate")}</span>
+          </div>
+        </header>
+      )}
 
-      <div className={styles.toolbar}>
-        <span className={styles.count}>{t("tasksCount", { count: filtered.length })}</span>
+      <div className={influencerView ? styles.toolbarCompact : styles.toolbar}>
+        {!influencerView && (
+          <span className={styles.count}>{t("tasksCount", { count: filtered.length })}</span>
+        )}
         <div className={styles.toolbarRight}>
           {!hideInfluencerColumns && influencers.length > 0 && (
             <label className={styles.toggle}>
@@ -450,38 +507,32 @@ export default function TaskBoard({
         </div>
       </div>
 
-      <div className={styles.dateFilterBar}>
-        <span className={styles.dateFilterLabel}>{t("filterByDay")}</span>
-        <div className={styles.dateFilterTabs}>
-          <button
-            type="button"
-            className={`${styles.dateFilterTab} ${dateFilter === "principal" ? styles.dateFilterTabActive : ""}`}
-            onClick={() => setDateFilter("principal")}
-          >
-            {t("principal")}
-            <span className={styles.dateFilterCount}>{tasks.length}</span>
-          </button>
-          <button
-            type="button"
-            className={`${styles.dateFilterTab} ${dateFilter === "geral" ? styles.dateFilterTabActive : ""}`}
-            onClick={() => setDateFilter("geral")}
-          >
-            {t("general")}
-            <span className={styles.dateFilterCount}>{tasks.length}</span>
-          </button>
-          {availableDays.length > 0 && <span className={styles.dateFilterDivider} />}
-          {availableDays.map((day) => (
+      <div className={influencerView ? styles.dateFilterBarCompact : styles.dateFilterBar}>
+        {influencerView ? (
+          <>
             <button
-              key={day}
               type="button"
-              className={`${styles.dateFilterTab} ${dateFilter === day ? styles.dateFilterTabActive : ""}`}
-              onClick={() => setDateFilter(day)}
+              className={styles.dateFilterToggle}
+              onClick={() => setDateFilterExpanded((open) => !open)}
+              aria-expanded={dateFilterExpanded}
             >
-              {formatFilterDayLabel(day, locale)}
-              <span className={styles.dateFilterCount}>{dayCounts.get(day) ?? 0}</span>
+              <span className={styles.dateFilterToggleLabel}>
+                {t("filterByDay")}: {activeDateFilterLabel}
+              </span>
+              <span className={styles.dateFilterChevron} aria-hidden>
+                {dateFilterExpanded ? "▾" : "▸"}
+              </span>
             </button>
-          ))}
-        </div>
+            {dateFilterExpanded && (
+              <div className={styles.dateFilterPanel}>{dateFilterTabs}</div>
+            )}
+          </>
+        ) : (
+          <>
+            <span className={styles.dateFilterLabel}>{t("filterByDay")}</span>
+            <div className={styles.dateFilterTabs}>{dateFilterTabs}</div>
+          </>
+        )}
       </div>
 
       {success && <div className={styles.success}>{success}</div>}
@@ -504,6 +555,8 @@ export default function TaskBoard({
             tasks={items}
             influencers={influencers}
             hideInfluencerColumns={hideInfluencerColumns}
+            hideDateColumn={influencerView}
+            compact={influencerView}
             onUpdate={updateTask}
             onOpen={(task) => setSelectedTaskId(task.id)}
             onCreate={() =>

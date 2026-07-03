@@ -22,6 +22,8 @@ interface Props {
   task: Task;
   influencers: Influencer[];
   hideInfluencerColumns?: boolean;
+  hideDateColumn?: boolean;
+  compact?: boolean;
   onUpdate: (id: string, updates: TaskUpdate) => void;
   onOpen: () => void;
   onDelete: (id: string) => void;
@@ -31,6 +33,8 @@ export default function TaskRow({
   task,
   influencers,
   hideInfluencerColumns = false,
+  hideDateColumn = false,
+  compact = false,
   onUpdate,
   onOpen,
   onDelete,
@@ -85,7 +89,10 @@ export default function TaskRow({
   const stop = (e: React.MouseEvent) => e.stopPropagation();
 
   return (
-    <tr className={styles.row} onClick={onOpen}>
+    <tr
+      className={`${styles.row} ${compact ? styles.rowCompact : ""}`}
+      onClick={onOpen}
+    >
       <td className={styles.cell}>
         <div className={styles.nameCell}>
           <span
@@ -161,41 +168,43 @@ export default function TaskRow({
         </>
       )}
 
-      <td className={styles.cell} onClick={stop}>
-        {editingDate ? (
-          <input
-            ref={dateRef}
-            type="date"
-            className={styles.dateInput}
-            defaultValue={task.due_date ?? ""}
-            onBlur={() => setEditingDate(false)}
-            onChange={(e) => {
-              const v = e.target.value || null;
-              onUpdate(task.id, { due_date: v });
-              setEditingDate(false);
-            }}
-          />
-        ) : (
-          <button
-            type="button"
-            className={styles.dateBtn}
-            onClick={() => setEditingDate(true)}
-          >
-            {task.due_date ? (
-              <span className={styles.dateText}>{formatDate(task.due_date, locale)}</span>
-            ) : (
-              <span className={styles.dateEmpty} aria-label={t("setDate")}>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <rect x="3" y="4" width="18" height="18" rx="2" />
-                  <line x1="16" y1="2" x2="16" y2="6" />
-                  <line x1="8" y1="2" x2="8" y2="6" />
-                  <line x1="3" y1="10" x2="21" y2="10" />
-                </svg>
-              </span>
-            )}
-          </button>
-        )}
-      </td>
+      {!hideDateColumn && (
+        <td className={styles.cell} onClick={stop}>
+          {editingDate ? (
+            <input
+              ref={dateRef}
+              type="date"
+              className={styles.dateInput}
+              defaultValue={task.due_date ?? ""}
+              onBlur={() => setEditingDate(false)}
+              onChange={(e) => {
+                const v = e.target.value || null;
+                onUpdate(task.id, { due_date: v });
+                setEditingDate(false);
+              }}
+            />
+          ) : (
+            <button
+              type="button"
+              className={styles.dateBtn}
+              onClick={() => setEditingDate(true)}
+            >
+              {task.due_date ? (
+                <span className={styles.dateText}>{formatDate(task.due_date, locale)}</span>
+              ) : (
+                <span className={styles.dateEmpty} aria-label={t("setDate")}>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <rect x="3" y="4" width="18" height="18" rx="2" />
+                    <line x1="16" y1="2" x2="16" y2="6" />
+                    <line x1="8" y1="2" x2="8" y2="6" />
+                    <line x1="3" y1="10" x2="21" y2="10" />
+                  </svg>
+                </span>
+              )}
+            </button>
+          )}
+        </td>
+      )}
 
       <td className={styles.cell} onClick={stop}>
         <select

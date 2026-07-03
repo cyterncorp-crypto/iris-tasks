@@ -1,24 +1,63 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import type { Influencer, Task } from "@/lib/types";
-import { useT } from "@/lib/i18n/LocaleProvider";
+import { LocaleProvider, useT } from "@/lib/i18n/LocaleProvider";
 import TaskBoardClient from "@/components/TaskBoardClient";
 import InfluencerProgressBar from "@/components/InfluencerProgressBar";
-import TranslatedText from "@/components/TranslatedText";
+import InfluencerLoginCredentials from "@/components/InfluencerLoginCredentials";
+import LocaleToggle from "@/components/LocaleToggle";
 import styles from "./profile.module.css";
 
-export default function InfluencerProfilePage() {
+function InfluencerProfileContent({
+  influencer,
+}: {
+  influencer: Influencer;
+}) {
+  const [tasks, setTasks] = useState<Task[]>([]);
+
+  return (
+    <div>
+      <div className={styles.profileBanner}>
+        <div className={styles.profileTopRow}>
+          <div className={styles.profileHeader}>
+            {influencer.photo_url ? (
+              <img
+                src={influencer.photo_url}
+                alt=""
+                className={styles.profileAvatar}
+              />
+            ) : (
+              <span className={styles.profileAvatarPlaceholder}>
+                {influencer.name.charAt(0).toUpperCase()}
+              </span>
+            )}
+            <InfluencerLoginCredentials influencer={influencer} />
+          </div>
+          <LocaleToggle />
+        </div>
+        <InfluencerProgressBar tasks={tasks} />
+      </div>
+
+      <TaskBoardClient
+        influencerId={influencer.id}
+        hideInfluencerColumns
+        influencerView
+        onTasksChange={setTasks}
+      />
+    </div>
+  );
+}
+
+function InfluencerProfilePageInner() {
   const params = useParams();
   const slug = params.slug as string;
   const { t } = useT();
   const [influencer, setInfluencer] = useState<Influencer | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
-  const [tasks, setTasks] = useState<Task[]>([]);
 
   useEffect(() => {
     const isUuid =
@@ -46,46 +85,17 @@ export default function InfluencerProfilePage() {
     return (
       <div className={styles.notFound}>
         <p>{t("influencerNotFound")}</p>
-        <Link href="/influenciadores">{t("backToInfluencers")}</Link>
       </div>
     );
   }
 
-  return (
-    <div>
-      <div className={styles.profileBanner}>
-        <Link href="/influenciadores" className={styles.backLink}>
-          {t("backInfluencers")}
-        </Link>
-        <div className={styles.profileHeader}>
-          {influencer.photo_url ? (
-            <img
-              src={influencer.photo_url}
-              alt=""
-              className={styles.profileAvatar}
-            />
-          ) : (
-            <span className={styles.profileAvatarPlaceholder}>
-              {influencer.name.charAt(0).toUpperCase()}
-            </span>
-          )}
-          <div>
-            <h1 className={styles.profileName}>
-              <TranslatedText text={influencer.name} />
-            </h1>
-            <p className={styles.profileSub}>{t("profileTasksSubtitle")}</p>
-          </div>
-        </div>
-        <InfluencerProgressBar tasks={tasks} />
-      </div>
+  return <InfluencerProfileContent influencer={influencer} />;
+}
 
-      <TaskBoardClient
-        influencerId={influencer.id}
-        title={influencer.name}
-        subtitle={t("profileTasksOnly")}
-        hideInfluencerColumns
-        onTasksChange={setTasks}
-      />
-    </div>
+export default function InfluencerProfilePage() {
+  return (
+    <LocaleProvider storageKey="sayyo-locale-influencer" defaultLocale="ru">
+      <InfluencerProfilePageInner />
+    </LocaleProvider>
   );
 }

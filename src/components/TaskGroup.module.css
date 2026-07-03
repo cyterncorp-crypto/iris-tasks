@@ -77,6 +77,54 @@
 .colTag { width: 22%; }
 .colActions { width: 40px; }
 
+.tableCompact {
+  min-width: 0;
+}
+
+.tableCompact .colName {
+  width: 38%;
+}
+
+.tableCompact .colStatus {
+  width: 22%;
+}
+
+.tableCompact .colTag {
+  width: 32%;
+}
+
+.tableCompact .colActions {
+  width: 32px;
+}
+
+@media (max-width: 640px) {
+  .tableCompact {
+    min-width: 300px;
+  }
+
+  .tableCompact .colName {
+    width: 34%;
+  }
+
+  .tableCompact .colStatus {
+    width: 24%;
+  }
+
+  .tableCompact .colTag {
+    width: 34%;
+  }
+
+  .tableCompact th {
+    padding: 8px 6px;
+    font-size: 10px;
+  }
+
+  .tableCompact .addBtn {
+    font-size: 14px;
+    padding: 12px 14px;
+  }
+}
+
 .addBtn {
   display: block;
   width: 100%;

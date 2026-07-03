@@ -13,6 +13,8 @@ interface Props {
   tasks: Task[];
   influencers: Influencer[];
   hideInfluencerColumns?: boolean;
+  hideDateColumn?: boolean;
+  compact?: boolean;
   onUpdate: (id: string, updates: TaskUpdate) => void;
   onOpen: (task: Task) => void;
   onCreate: () => void;
@@ -27,6 +29,8 @@ export default function TaskGroup({
   tasks,
   influencers,
   hideInfluencerColumns = false,
+  hideDateColumn = false,
+  compact = false,
   onUpdate,
   onOpen,
   onCreate,
@@ -52,7 +56,9 @@ export default function TaskGroup({
 
       {!collapsed && (
         <div className={styles.tableWrap}>
-          <table className={styles.table}>
+          <table
+            className={`${styles.table} ${compact ? styles.tableCompact : ""}`}
+          >
             <thead>
               <tr>
                 <th className={styles.colName}>{t("taskName")}</th>
@@ -62,7 +68,9 @@ export default function TaskGroup({
                     <th className={styles.colInfluencer}>{t("influencer")}</th>
                   </>
                 )}
-                <th className={styles.colDate}>{t("dueDate")}</th>
+                {!hideDateColumn && (
+                  <th className={styles.colDate}>{t("dueDate")}</th>
+                )}
                 <th className={styles.colStatus}>{t("status")}</th>
                 <th className={styles.colTag}>{t("tag")}</th>
                 <th className={styles.colActions} />
@@ -75,6 +83,8 @@ export default function TaskGroup({
                   task={task}
                   influencers={influencers}
                   hideInfluencerColumns={hideInfluencerColumns}
+                  hideDateColumn={hideDateColumn}
+                  compact={compact}
                   onUpdate={onUpdate}
                   onOpen={() => onOpen(task)}
                   onDelete={onDelete}

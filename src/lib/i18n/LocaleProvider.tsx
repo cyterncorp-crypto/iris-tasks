@@ -97,8 +97,16 @@ function setDynamicVersionGlobal() {
   versionListeners.forEach((fn) => fn());
 }
 
-export function LocaleProvider({ children }: { children: ReactNode }) {
-  const [locale, setLocaleState] = useState<Locale>("pt");
+export function LocaleProvider({
+  children,
+  storageKey = STORAGE_KEY,
+  defaultLocale = "pt",
+}: {
+  children: ReactNode;
+  storageKey?: string;
+  defaultLocale?: Locale;
+}) {
+  const [locale, setLocaleState] = useState<Locale>(defaultLocale);
   const [dynamicVersion, setDynamicVersion] = useState(0);
   const [translating, setTranslating] = useState(false);
   const [hydrated, setHydrated] = useState(false);
@@ -119,29 +127,24 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY) as Locale | null;
-    const browserLocale = navigator.languages?.some((lang) =>
-      lang.toLowerCase().startsWith("ru")
-    )
-      ? "ru"
-      : "pt";
-    const next: Locale =
-      stored === "pt" || stored === "ru" ? stored : browserLocale;
+    const stored = localStorage.getItem(storageKey) as Locale | null;
+    let next: Locale;
+    if (stored === "pt" || stored === "ru") {
+      next = stored;
+    } else if (storageKey === STORAGE_KEY) {
+      const browserRu = navigator.languages?.some((lang) =>
+        lang.toLowerCase().startsWith("ru")
+      );
+      next = browserRu ? "ru" : "pt";
+    } else {
+      next = defaultLocale;
+    }
 
     localeRef.current = next;
     setLocaleState(next);
     document.documentElement.lang = next === "ru" ? "ru" : "pt-BR";
     setHydrated(true);
-  }, []);
-
-  useEffect(() => {
-    if (!hydrated) return;
-    const stored = localStorage.getItem(STORAGE_KEY) as Locale | null;
-    if (stored === "pt" || stored === "ru") {
-      localeRef.current = stored;
-      setLocaleState(stored);
-    }
-  }, [hydrated]);
+  }, [storageKey, defaultLocale]);
 
   const subscribeLocalePrefetch = useCallback((fn: () => void) => {
     prefetchListenersRef.current.add(fn);
@@ -150,17 +153,20 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  const setLocale = useCallback((next: Locale) => {
-    localeRef.current = next;
-    setLocaleState(next);
-    localStorage.setItem(STORAGE_KEY, next);
-    document.documentElement.lang = next === "ru" ? "ru" : "pt-BR";
-    setDynamicVersion((v) => v + 1);
+  const setLocale = useCallback(
+    (next: Locale) => {
+      localeRef.current = next;
+      setLocaleState(next);
+      localStorage.setItem(storageKey, next);
+      document.documentElement.lang = next === "ru" ? "ru" : "pt-BR";
+      setDynamicVersion((v) => v + 1);
 
-    if (next === "ru") {
-      prefetchListenersRef.current.forEach((fn) => fn());
-    }
-  }, []);
+      if (next === "ru") {
+        prefetchListenersRef.current.forEach((fn) => fn());
+      }
+    },
+    [storageKey]
+  );
 
   useEffect(() => {
     localeRef.current = locale;
