@@ -14,7 +14,7 @@ import {
   getTaskImages,
   imageUrlsEqual,
 } from "@/lib/task-images-utils";
-import { deleteTaskImage, uploadTaskImage, validatePhotoFile } from "@/lib/upload-photo";
+import { deleteTaskImageIfUnused, uploadTaskImage, validatePhotoFile } from "@/lib/upload-photo";
 import {
   ALL_STATUSES,
   getDisplayStatus,
@@ -240,10 +240,10 @@ export default function TaskDetailModal({
     setUploading(true);
     setError(null);
     try {
-      await deleteTaskImage(url);
       const next = images.filter((u) => u !== url);
       setImages(next);
       await persistImages(next);
+      await deleteTaskImageIfUnused(url, task.id);
     } catch (e) {
       setError(e instanceof Error ? e.message : t("errorSave"));
       setImages(getTaskImages(task));

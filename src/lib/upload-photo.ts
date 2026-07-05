@@ -127,6 +127,29 @@ export async function deleteTaskImage(url: string): Promise<void> {
   return deleteStorageImage(url, TASK_BUCKET);
 }
 
+export async function deleteTaskImageIfUnused(
+  url: string,
+  currentTaskId: string
+): Promise<void> {
+  if (!isStoragePhotoUrl(url, TASK_BUCKET)) return;
+
+  const { data, error } = await supabase
+    .from("tasks")
+    .select("id,image_url,image_urls");
+
+  if (error) throw error;
+
+  const stillUsed = (data ?? []).some((task) => {
+    if (task.id === currentTaskId) return false;
+    if (task.image_url === url) return true;
+    return Array.isArray(task.image_urls) && task.image_urls.includes(url);
+  });
+
+  if (!stillUsed) {
+    await deleteTaskImage(url);
+  }
+}
+
 export async function checkStorageAvailable(bucket = INFLUENCER_BUCKET): Promise<boolean> {
   const { error } = await supabase.storage.from(bucket).list("", { limit: 1 });
   return !error;
