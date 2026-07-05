@@ -8,6 +8,8 @@ create table if not exists influencers (
   name text not null,
   slug text,
   photo_url text,
+  subscription_price_rub integer check (subscription_price_rub is null or subscription_price_rub > 0),
+  onboarding_completed boolean not null default false,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );

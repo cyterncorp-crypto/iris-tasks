@@ -7,21 +7,25 @@ import styles from "./InfluencerProgressBar.module.css";
 
 interface Props {
   tasks: Task[];
+  variant?: "inline" | "card";
 }
 
-export default function InfluencerProgressBar({ tasks }: Props) {
+export default function InfluencerProgressBar({ tasks, variant = "inline" }: Props) {
   const { t } = useT();
   const { done, total, percent } = getInfluencerOverallProgress(tasks);
+  const isCard = variant === "card";
 
   return (
-    <div className={styles.wrap}>
+    <div className={isCard ? styles.cardWrap : styles.wrap}>
       <div className={styles.header}>
-        <span className={styles.label}>{t("overallProgress")}</span>
-        <span className={styles.stats}>
+        <span className={isCard ? styles.cardLabel : styles.label}>
+          {t("overallProgress")}
+        </span>
+        <span className={isCard ? styles.cardStats : styles.stats}>
           {t("tasksCompleted", { done, total, percent })}
         </span>
       </div>
-      <div className={styles.track}>
+      <div className={isCard ? styles.cardTrack : styles.track}>
         <div
           className={styles.fill}
           style={{ width: `${percent}%` }}

@@ -151,6 +151,29 @@ export const messages = {
     errorPageTitle: "Algo deu errado",
     errorPageBack: "Voltar ao início",
     uploadingImages: "Enviando…",
+    onboardingContinue: "Continuar",
+    onboardingConfirm: "Confirmar",
+    onboardingUnderstand: "Sim, eu entendo…",
+    onboardingFinish: "Finalizar",
+    onboardingSkip: "Pular",
+    onboardingStepOf: "{current} de {total}",
+    onboardingPriceRequired: "Informe um valor válido em rublos.",
+    onboardingWelcome:
+      "Olá, {name}, seja bem-vindo ao passo a passo para o lançamento do seu perfil na plataforma de assinatura mensal para os seus fans, a Sayyo, que vai possibilitar receber pagamentos na Rússia e internacionais mensais por assinatura.",
+    onboardingPriceQuestion:
+      "Quanto pretende cobrar pela assinatura mensal que seus fans terão acesso ao seu perfil privado da Sayyo?",
+    onboardingPriceLabel: "Digite em rublos (₽)",
+    onboardingPriceConversion: "≈ {usd} em dólares",
+    onboardingPriceRecommended:
+      "Recomendado inicialmente: {minUsd} – {maxUsd} ({minRub} – {maxRub})",
+    onboardingProgressExplain:
+      "No topo do seu perfil de tarefas, tem uma barra de progressão até 100%, de quantas tarefas completou. Ela indica quantos % de sucesso tem o lançamento e venda de assinaturas para seu perfil baseado em quantas tarefas você completa para aquecer seu público para o lançamento do seu conteúdo privado.",
+    onboardingTasksExplain:
+      "Todas as tarefas foram feitas baseado em outros influenciadores que também já lançaram conteúdo pago privado para fans, e todas as tarefas são importantes para seu público lembrar da data do lançamento.",
+    subscriptionPriceTitle: "Assinatura mensal",
+    subscriptionPriceRub: "Preço (₽)",
+    subscriptionPriceUsd: "Equivalente (USD)",
+    subscriptionSetPrice: "+ Definir preço da assinatura",
   },
   ru: {
     appTitle: "Sayyo Tasks",
@@ -284,6 +307,29 @@ export const messages = {
     errorPageTitle: "Что-то пошло не так",
     errorPageBack: "Вернуться на главную",
     uploadingImages: "Загрузка…",
+    onboardingContinue: "Продолжить",
+    onboardingConfirm: "Подтвердить",
+    onboardingUnderstand: "Да, я понимаю…",
+    onboardingFinish: "Завершить",
+    onboardingSkip: "Пропустить",
+    onboardingStepOf: "{current} из {total}",
+    onboardingPriceRequired: "Укажите корректную сумму в рублях.",
+    onboardingWelcome:
+      "Привет, {name}! Добро пожаловать в пошаговое руководство по запуску вашего профиля на платформе ежемесячной подписки для ваших фанатов — Sayyo, которая позволит получать ежемесячные платежи в России и за рубежом по подписке.",
+    onboardingPriceQuestion:
+      "Сколько вы планируете брать за ежемесячную подписку, дающую фанатам доступ к вашему приватному профилю Sayyo?",
+    onboardingPriceLabel: "Введите в рублях (₽)",
+    onboardingPriceConversion: "≈ {usd} в долларах",
+    onboardingPriceRecommended:
+      "Рекомендуется на старте: {minUsd} – {maxUsd} ({minRub} – {maxRub})",
+    onboardingProgressExplain:
+      "Вверху вашего профиля задач есть шкала прогресса до 100% — сколько задач вы выполнили. Она показывает, насколько успешным будет запуск и продажа подписок на ваш профиль, в зависимости от того, сколько задач вы выполняете, чтобы разогреть аудиторию к запуску приватного контента.",
+    onboardingTasksExplain:
+      "Все задачи составлены на основе опыта других инфлюенсеров, которые уже запускали платный приватный контент для фанатов. Каждая задача важна, чтобы ваша аудитория помнила дату запуска.",
+    subscriptionPriceTitle: "Ежемесячная подписка",
+    subscriptionPriceRub: "Цена (₽)",
+    subscriptionPriceUsd: "Эквивалент (USD)",
+    subscriptionSetPrice: "+ Установить цену подписки",
   },
 } as const;
 

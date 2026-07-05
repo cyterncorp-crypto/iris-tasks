@@ -22,6 +22,8 @@ export interface Influencer {
   name: string;
   slug?: string | null;
   photo_url: string | null;
+  subscription_price_rub?: number | null;
+  onboarding_completed?: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -67,7 +69,9 @@ export type TaskUpdate = Partial<
   >
 >;
 
-export type InfluencerUpdate = Partial<Pick<Influencer, "name" | "photo_url">>;
+export type InfluencerUpdate = Partial<
+  Pick<Influencer, "name" | "photo_url" | "subscription_price_rub" | "onboarding_completed">
+>;
 
 export function getTaskInfluencer(task: Task): Influencer | null {
   return task.influencer ?? null;

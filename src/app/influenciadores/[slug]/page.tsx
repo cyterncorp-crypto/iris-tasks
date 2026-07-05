@@ -1,45 +1,77 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import type { Influencer, Task } from "@/lib/types";
 import { LocaleProvider, useT } from "@/lib/i18n/LocaleProvider";
 import TaskBoardClient from "@/components/TaskBoardClient";
-import InfluencerProgressBar from "@/components/InfluencerProgressBar";
-import InfluencerLoginCredentials from "@/components/InfluencerLoginCredentials";
-import LocaleToggle from "@/components/LocaleToggle";
+import InfluencerProfileCard from "@/components/InfluencerProfileCard";
+import InfluencerOnboardingModal from "@/components/InfluencerOnboardingModal";
 import styles from "./profile.module.css";
 
+function shouldShowOnboarding(influencer: Influencer): boolean {
+  if (influencer.subscription_price_rub != null) return false;
+  if (influencer.onboarding_completed) return false;
+  return true;
+}
+
 function InfluencerProfileContent({
-  influencer,
+  influencer: initialInfluencer,
 }: {
   influencer: Influencer;
 }) {
+  const [influencer, setInfluencer] = useState(initialInfluencer);
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [showOnboarding, setShowOnboarding] = useState(() =>
+    shouldShowOnboarding(initialInfluencer)
+  );
+
+  const handleInfluencerUpdate = useCallback((updates: Partial<Influencer>) => {
+    setInfluencer((prev) => ({ ...prev, ...updates }));
+    if (updates.subscription_price_rub != null) {
+      setShowOnboarding(false);
+    }
+  }, []);
+
+  const handleOnboardingComplete = useCallback(
+    async (priceRub: number) => {
+      const { error } = await supabase
+        .from("influencers")
+        .update({
+          subscription_price_rub: priceRub,
+          onboarding_completed: true,
+        })
+        .eq("id", influencer.id);
+      if (error) throw error;
+      handleInfluencerUpdate({
+        subscription_price_rub: priceRub,
+        onboarding_completed: true,
+      });
+      setShowOnboarding(false);
+    },
+    [influencer.id, handleInfluencerUpdate]
+  );
+
+  const handleOnboardingDismiss = useCallback(() => {
+    setShowOnboarding(false);
+  }, []);
 
   return (
     <div>
-      <div className={styles.profileBanner}>
-        <div className={styles.profileTopRow}>
-          <div className={styles.profileHeader}>
-            {influencer.photo_url ? (
-              <img
-                src={influencer.photo_url}
-                alt=""
-                className={styles.profileAvatar}
-              />
-            ) : (
-              <span className={styles.profileAvatarPlaceholder}>
-                {influencer.name.charAt(0).toUpperCase()}
-              </span>
-            )}
-            <InfluencerLoginCredentials influencer={influencer} />
-          </div>
-          <LocaleToggle />
-        </div>
-        <InfluencerProgressBar tasks={tasks} />
-      </div>
+      {showOnboarding && (
+        <InfluencerOnboardingModal
+          influencer={influencer}
+          onComplete={handleOnboardingComplete}
+          onDismiss={handleOnboardingDismiss}
+        />
+      )}
+
+      <InfluencerProfileCard
+        influencer={influencer}
+        tasks={tasks}
+        onInfluencerUpdate={handleInfluencerUpdate}
+      />
 
       <TaskBoardClient
         influencerId={influencer.id}

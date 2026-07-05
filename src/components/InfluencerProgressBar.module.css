@@ -43,3 +43,35 @@
   transition: width 0.35s ease;
   min-width: 0;
 }
+
+/* Card variant */
+.cardWrap {
+  width: 100%;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  background: var(--hover);
+}
+
+.cardLabel {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+}
+
+.cardStats {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.cardTrack {
+  height: 10px;
+  background: #e8e8ed;
+  border-radius: 999px;
+  overflow: hidden;
+  margin-top: 10px;
+}
