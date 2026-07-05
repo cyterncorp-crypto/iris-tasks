@@ -96,27 +96,29 @@ export default function InfluencerLoginCredentials({
               <span className={styles.rowValue}>{credentials.platformUrl}</span>
             </span>
           </a>
-          <div className={styles.infoRow}>
-            <span className={styles.iconCircle}>
-              <UserIcon />
-            </span>
-            <span className={styles.rowContent}>
-              <span className={styles.rowLabel}>{t("loginLabel")}</span>
-              <span className={`${styles.rowValue} ${styles.rowValueMono}`}>
-                {credentials.login}
+          <div className={styles.credentialsRow}>
+            <div className={styles.infoRow}>
+              <span className={styles.iconCircle}>
+                <UserIcon />
               </span>
-            </span>
-          </div>
-          <div className={styles.infoRow}>
-            <span className={styles.iconCircle}>
-              <LockIcon />
-            </span>
-            <span className={styles.rowContent}>
-              <span className={styles.rowLabel}>{t("passwordLabel")}</span>
-              <span className={`${styles.rowValue} ${styles.rowValueMono}`}>
-                {credentials.password}
+              <span className={styles.rowContent}>
+                <span className={styles.rowLabel}>{t("loginLabel")}</span>
+                <span className={`${styles.rowValue} ${styles.rowValueMono}`}>
+                  {credentials.login}
+                </span>
               </span>
-            </span>
+            </div>
+            <div className={styles.infoRow}>
+              <span className={styles.iconCircle}>
+                <LockIcon />
+              </span>
+              <span className={styles.rowContent}>
+                <span className={styles.rowLabel}>{t("passwordLabel")}</span>
+                <span className={`${styles.rowValue} ${styles.rowValueMono}`}>
+                  {credentials.password}
+                </span>
+              </span>
+            </div>
           </div>
         </div>
       </section>
