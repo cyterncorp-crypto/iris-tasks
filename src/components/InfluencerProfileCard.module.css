@@ -42,17 +42,26 @@
   gap: 16px;
 }
 
+.avatarRing {
+  padding: 3px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #00b6ff, #007aff, #5b5bd6);
+  box-shadow: 0 4px 14px rgba(0, 122, 255, 0.35);
+  flex-shrink: 0;
+}
+
 .avatar,
 .avatarPlaceholder {
   width: 96px;
   height: 96px;
   border-radius: 50%;
   flex-shrink: 0;
+  display: block;
 }
 
 .avatar {
   object-fit: cover;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  background: var(--surface);
 }
 
 .avatarPlaceholder {
@@ -63,12 +72,19 @@
   font-size: 36px;
   font-weight: 700;
   color: var(--text-muted);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .identity {
   text-align: center;
   width: 100%;
+}
+
+.nameRow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  max-width: 100%;
 }
 
 .name {

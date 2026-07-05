@@ -5,6 +5,7 @@ import InfluencerLoginCredentials from "@/components/InfluencerLoginCredentials"
 import InfluencerSubscriptionPrice from "@/components/InfluencerSubscriptionPrice";
 import InfluencerProgressBar from "@/components/InfluencerProgressBar";
 import LocaleToggle from "@/components/LocaleToggle";
+import VerifiedBadge from "@/components/VerifiedBadge";
 import { useT } from "@/lib/i18n/LocaleProvider";
 import styles from "./InfluencerProfileCard.module.css";
 
@@ -31,20 +32,25 @@ export default function InfluencerProfileCard({
       <div className={styles.cardWrapper}>
         <div className={styles.card}>
           <div className={styles.cardInner}>
-            {influencer.photo_url ? (
-              <img
-                src={influencer.photo_url}
-                alt=""
-                className={styles.avatar}
-              />
-            ) : (
-              <span className={styles.avatarPlaceholder}>
-                {influencer.name.charAt(0).toUpperCase()}
-              </span>
-            )}
+            <div className={styles.avatarRing}>
+              {influencer.photo_url ? (
+                <img
+                  src={influencer.photo_url}
+                  alt=""
+                  className={styles.avatar}
+                />
+              ) : (
+                <span className={styles.avatarPlaceholder}>
+                  {influencer.name.charAt(0).toUpperCase()}
+                </span>
+              )}
+            </div>
 
             <div className={styles.identity}>
-              <h1 className={styles.name}>{influencer.name}</h1>
+              <div className={styles.nameRow}>
+                <h1 className={styles.name}>{influencer.name}</h1>
+                <VerifiedBadge />
+              </div>
               <div className={styles.progressUnderName}>
                 <InfluencerProgressBar tasks={tasks} variant="card" />
               </div>
