@@ -19,8 +19,10 @@ Known accounts:
   - This account can see an empty/new `iris-tasks` project created by accidental relink.
   - Do not deploy production from this account unless the project/env vars are intentionally configured.
 - `imandrelucas@gmail.com`
+  - CLI username seen locally: `andrezaolucas`
   - Local profile: `$HOME/.vercel-accounts/imandrelucas`
-  - Expected account for the original Iris Tasks / Sayyo Tasks production project.
+  - Checked on 2026-07-13: this account is logged in and does not list `iris-tasks`.
+  - Projects visible in this account at the time of the audit: `utilwave`, `peticao-luan`, `peticao-flanelinha`, `clazzy`.
 
 Never commit Vercel tokens. The profile directories above live outside the repo and contain local auth state only.
 
@@ -45,10 +47,16 @@ vercel --global-config "$HOME/.vercel-accounts/imandrelucas" deploy --prod --yes
 
 If Vercel asks to link the project, stop and verify the account first. A wrong relink can create a new empty `iris-tasks` project with no env vars.
 
+As of 2026-07-13, the original Iris Tasks / Sayyo Tasks production project was not found in either visible account:
+
+- `andre@privify.com.br`
+- `imandrelucas@gmail.com`
+
+Do not run production deploy until the correct Vercel project/account is identified or production env vars are intentionally recreated in a new project.
+
 Useful project references found during the 2026-07-13 audit:
 
 - GitHub repo: `https://github.com/cyterncorp-crypto/iris-tasks.git`
 - Old local Vercel project id from `.vercel/project.json`: `prj_ztUoGZfeRwo0pMwV7HSNSljkcD7d`
 - Empty/new project seen under `andre@privify.com.br`: `prj_lDe3d1JluQAGjAg7EBhGyYNdgUvY`
 - Old URL checked: `https://iris-tasks-murex.vercel.app`
-
