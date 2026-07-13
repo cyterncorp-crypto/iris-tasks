@@ -16,6 +16,8 @@ import {
 import { checklistMatchesSearch, getTaskChecklist } from "@/lib/checklist-utils";
 import { getTaskTags } from "@/lib/tag-utils";
 import { buildTaskCopyPayload } from "@/lib/task-copy-utils";
+import { getTaskImages } from "@/lib/task-images-utils";
+import { duplicateTaskImages } from "@/lib/upload-photo";
 import { collectTranslatableTexts } from "@/lib/collect-translatable-texts";
 import { useT } from "@/lib/i18n/LocaleProvider";
 import TranslatedText from "./TranslatedText";
@@ -277,7 +279,16 @@ export default function TaskBoard({
       setError(null);
       setSuccess(null);
 
-      const inserts = targetIds.map((id) => buildTaskCopyPayload(source, id));
+      // Cada cópia recebe arquivos próprios no storage (não compartilha URL)
+      const sourceImages = getTaskImages(source);
+      const inserts = [];
+      for (const id of targetIds) {
+        const images =
+          sourceImages.length > 0
+            ? await duplicateTaskImages(sourceImages)
+            : [];
+        inserts.push(buildTaskCopyPayload(source, id, images));
+      }
 
       const { data, error: err } = await supabase
         .from("tasks")

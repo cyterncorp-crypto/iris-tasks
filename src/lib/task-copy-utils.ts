@@ -4,8 +4,11 @@ import { getTaskImages } from "./task-images-utils";
 import { getTaskTags, normalizeTaskTags } from "./tag-utils";
 import { normalizeStatus } from "./task-utils";
 
-export function buildTaskCopyPayload(source: Task, influencerId: string) {
-  const images = getTaskImages(source);
+export function buildTaskCopyPayload(
+  source: Task,
+  influencerId: string,
+  images: string[] = getTaskImages(source)
+) {
   const checklist: ChecklistItem[] = getTaskChecklist(source).map((item) => ({
     ...item,
     id: crypto.randomUUID(),

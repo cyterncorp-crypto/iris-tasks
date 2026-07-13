@@ -150,6 +150,39 @@ export async function deleteTaskImageIfUnused(
   }
 }
 
+/** Copia o arquivo no storage e devolve uma nova URL pública (evita imagens compartilhadas entre tarefas). */
+export async function duplicateTaskImage(url: string): Promise<string | null> {
+  if (!isStoragePhotoUrl(url, TASK_BUCKET)) return null;
+
+  const marker = `/storage/v1/object/public/${TASK_BUCKET}/`;
+  const sourcePath = decodeURIComponent(url.split(marker)[1] ?? "");
+  if (!sourcePath) return null;
+
+  const ext = sourcePath.split(".").pop() || "jpg";
+  const destPath = `${crypto.randomUUID()}.${ext}`;
+
+  const { error } = await supabase.storage
+    .from(TASK_BUCKET)
+    .copy(sourcePath, destPath);
+
+  if (error) {
+    // Arquivo ausente ou sem permissão — não bloqueia a cópia da tarefa
+    console.warn("Falha ao duplicar imagem da tarefa:", error.message);
+    return null;
+  }
+
+  return getStoragePublicUrl(destPath, TASK_BUCKET);
+}
+
+export async function duplicateTaskImages(urls: string[]): Promise<string[]> {
+  const next: string[] = [];
+  for (const url of urls) {
+    const copied = await duplicateTaskImage(url);
+    if (copied) next.push(copied);
+  }
+  return next;
+}
+
 export async function checkStorageAvailable(bucket = INFLUENCER_BUCKET): Promise<boolean> {
   const { error } = await supabase.storage.from(bucket).list("", { limit: 1 });
   return !error;

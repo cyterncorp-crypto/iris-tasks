@@ -46,6 +46,61 @@ function checklistsEqual(a: ChecklistItem[], b: ChecklistItem[]): boolean {
   );
 }
 
+function TaskImageCard({
+  url,
+  busy,
+  onDownload,
+  onRemove,
+  downloadLabel,
+  removeLabel,
+  brokenLabel,
+}: {
+  url: string;
+  busy: boolean;
+  onDownload: () => void;
+  onRemove: () => void;
+  downloadLabel: string;
+  removeLabel: string;
+  brokenLabel: string;
+}) {
+  const [broken, setBroken] = useState(false);
+
+  return (
+    <div className={styles.imageCard}>
+      {broken ? (
+        <div className={styles.imageBroken} role="img" aria-label={brokenLabel}>
+          {brokenLabel}
+        </div>
+      ) : (
+        <img
+          src={url}
+          alt=""
+          className={styles.taskImageThumb}
+          onError={() => setBroken(true)}
+        />
+      )}
+      <div className={styles.imageCardActions}>
+        <button
+          type="button"
+          className={styles.smallBtn}
+          disabled={busy || broken}
+          onClick={onDownload}
+        >
+          {downloadLabel}
+        </button>
+        <button
+          type="button"
+          className={`${styles.smallBtn} ${styles.smallBtnDanger}`}
+          disabled={busy}
+          onClick={onRemove}
+        >
+          {removeLabel}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export default function TaskDetailModal({
   task,
   influencers,
@@ -443,27 +498,16 @@ export default function TaskDetailModal({
           {images.length > 0 && (
             <div className={styles.imageGrid}>
               {images.map((url) => (
-                <div key={url} className={styles.imageCard}>
-                  <img src={url} alt="" className={styles.taskImageThumb} />
-                  <div className={styles.imageCardActions}>
-                    <button
-                      type="button"
-                      className={styles.smallBtn}
-                      disabled={busy}
-                      onClick={() => handleDownload(url)}
-                    >
-                      {t("download")}
-                    </button>
-                    <button
-                      type="button"
-                      className={`${styles.smallBtn} ${styles.smallBtnDanger}`}
-                      disabled={busy}
-                      onClick={() => removeImage(url)}
-                    >
-                      {t("remove")}
-                    </button>
-                  </div>
-                </div>
+                <TaskImageCard
+                  key={url}
+                  url={url}
+                  busy={busy}
+                  onDownload={() => handleDownload(url)}
+                  onRemove={() => removeImage(url)}
+                  downloadLabel={t("download")}
+                  removeLabel={t("remove")}
+                  brokenLabel={t("imageUnavailable")}
+                />
               ))}
             </div>
           )}
