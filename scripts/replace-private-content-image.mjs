@@ -5,11 +5,8 @@
 import fs from "fs";
 import path from "path";
 import crypto from "crypto";
-import { fileURLToPath } from "url";
 import { createClient } from "@supabase/supabase-js";
-
-const root = path.join(path.dirname(fileURLToPath(import.meta.url)), "..");
-const envPath = path.join(root, ".env.local");
+import { loadEnv, projectRoot } from "./load-env.mjs";
 
 const ASSETS = path.join(
   process.env.USERPROFILE || "",
@@ -23,19 +20,7 @@ const NEW_IMAGE = path.join(
   ASSETS,
   "c__Users_user_AppData_Roaming_Cursor_User_workspaceStorage_6f1dc698f05c2b2cadd1c3f65eb5e539_images_private_c-8ddbdb2f-d499-43e7-8873-c4ed8d7bd770.png"
 );
-const STORED_OLD = path.join(root, "scripts/_img-audit/f978cd553f86.png");
-
-function loadEnv() {
-  const vars = {};
-  for (const line of fs.readFileSync(envPath, "utf8").split(/\r?\n/)) {
-    const trimmed = line.trim();
-    if (!trimmed || trimmed.startsWith("#")) continue;
-    const eq = trimmed.indexOf("=");
-    if (eq === -1) continue;
-    vars[trimmed.slice(0, eq).trim()] = trimmed.slice(eq + 1).trim();
-  }
-  return vars;
-}
+const STORED_OLD = path.join(projectRoot, "scripts/_img-audit/f978cd553f86.png");
 
 function sha256(buf) {
   return crypto.createHash("sha256").update(buf).digest("hex");

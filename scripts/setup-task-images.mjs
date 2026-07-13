@@ -2,22 +2,7 @@
  * Cria o bucket task-images via API (requer SUPABASE_SERVICE_ROLE_KEY no .env.local)
  * Uso: node scripts/setup-task-images.mjs
  */
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
-
-const root = path.join(path.dirname(fileURLToPath(import.meta.url)), "..");
-const envPath = path.join(root, ".env.local");
-
-function loadEnv() {
-  if (!fs.existsSync(envPath)) return {};
-  const vars = {};
-  for (const line of fs.readFileSync(envPath, "utf8").split("\n")) {
-    const m = line.match(/^([^#=]+)=(.*)$/);
-    if (m) vars[m[1].trim()] = m[2].trim();
-  }
-  return vars;
-}
+import { loadEnv } from "./load-env.mjs";
 
 const env = loadEnv();
 const url = env.NEXT_PUBLIC_SUPABASE_URL;

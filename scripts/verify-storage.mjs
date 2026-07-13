@@ -1,23 +1,42 @@
-import fs from "fs";
+import { createClient } from "@supabase/supabase-js";
+import { loadEnv } from "./load-env.mjs";
 
-const env = fs.readFileSync(".env.local", "utf8");
-const key = env.match(/NEXT_PUBLIC_SUPABASE_ANON_KEY=(.+)/)?.[1]?.trim();
-const url = env.match(/NEXT_PUBLIC_SUPABASE_URL=(.+)/)?.[1]?.trim();
+const env = loadEnv();
+const key = env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+const url = env.NEXT_PUBLIC_SUPABASE_URL;
 
-const headers = { apikey: key, Authorization: `Bearer ${key}` };
+if (!url || !key) {
+  console.error("NEXT_PUBLIC_SUPABASE_URL ou NEXT_PUBLIC_SUPABASE_ANON_KEY ausente.");
+  process.exit(1);
+}
 
-const bucketRes = await fetch(`${url}/storage/v1/bucket/task-images`, { headers });
-const bucketBody = await bucketRes.text();
-console.log("bucket:", bucketRes.status, bucketBody);
+const supabase = createClient(url, key);
 
-const colsRes = await fetch(`${url}/rest/v1/tasks?select=description,image_url&limit=1`, { headers });
-const colsBody = await colsRes.text();
-console.log("columns:", colsRes.status, colsBody.slice(0, 300));
+const checks = [
+  {
+    name: "tasks.image_url/image_urls",
+    run: () => supabase.from("tasks").select("description,image_url,image_urls").limit(1),
+  },
+  {
+    name: "storage.task-images",
+    run: () => supabase.storage.from("task-images").list("", { limit: 1 }),
+  },
+  {
+    name: "storage.influencer-photos",
+    run: () => supabase.storage.from("influencer-photos").list("", { limit: 1 }),
+  },
+];
 
-const listRes = await fetch(`${url}/storage/v1/object/list/task-images`, {
-  method: "POST",
-  headers: { ...headers, "Content-Type": "application/json" },
-  body: JSON.stringify({ prefix: "", limit: 1 }),
-});
-const listBody = await listRes.text();
-console.log("list:", listRes.status, listBody.slice(0, 200));
+let failed = false;
+for (const check of checks) {
+  const { data, error } = await check.run();
+  if (error) {
+    failed = true;
+    console.log(`${check.name}: FAIL - ${error.message}`);
+  } else {
+    const count = Array.isArray(data) ? data.length : 0;
+    console.log(`${check.name}: OK (${count} item${count === 1 ? "" : "s"} verificado${count === 1 ? "" : "s"})`);
+  }
+}
+
+if (failed) process.exit(1);

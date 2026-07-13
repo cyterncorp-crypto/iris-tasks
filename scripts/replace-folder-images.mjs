@@ -7,22 +7,11 @@ import path from "path";
 import crypto from "crypto";
 import { createClient } from "@supabase/supabase-js";
 import sharp from "sharp";
+import { loadEnv } from "./load-env.mjs";
 
 const DIR_OLD = "C:/Users/user/Downloads/2607";
 const DIR_NEW = "C:/Users/user/Downloads/2607 (2)";
 const PAIR_COUNT = 7;
-
-function loadEnv() {
-  const vars = {};
-  for (const line of fs.readFileSync(".env.local", "utf8").split(/\r?\n/)) {
-    const trimmed = line.trim();
-    if (!trimmed || trimmed.startsWith("#")) continue;
-    const eq = trimmed.indexOf("=");
-    if (eq === -1) continue;
-    vars[trimmed.slice(0, eq).trim()] = trimmed.slice(eq + 1).trim();
-  }
-  return vars;
-}
 
 function sha256(buf) {
   return crypto.createHash("sha256").update(buf).digest("hex");

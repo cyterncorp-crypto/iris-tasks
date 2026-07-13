@@ -2,25 +2,8 @@
  * Troca 26/07 → 08/08 em todo conteúdo textual das tarefas.
  * Uso: node scripts/replace-date-text.mjs
  */
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
 import { createClient } from "@supabase/supabase-js";
-
-const root = path.join(path.dirname(fileURLToPath(import.meta.url)), "..");
-const envPath = path.join(root, ".env.local");
-
-function loadEnv() {
-  const vars = {};
-  for (const line of fs.readFileSync(envPath, "utf8").split(/\r?\n/)) {
-    const trimmed = line.trim();
-    if (!trimmed || trimmed.startsWith("#")) continue;
-    const eq = trimmed.indexOf("=");
-    if (eq === -1) continue;
-    vars[trimmed.slice(0, eq).trim()] = trimmed.slice(eq + 1).trim();
-  }
-  return vars;
-}
+import { loadEnv } from "./load-env.mjs";
 
 /** Só o formato escrito 26/07 (e variações com espaços). Não mexe em ISO 2026-07-xx. */
 const DATE_RE = /26\s*\/\s*07/g;

@@ -3,26 +3,10 @@
  * Uso: node scripts/shift-due-dates.mjs [dias]
  * Ex.: node scripts/shift-due-dates.mjs 13
  */
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
 import { createClient } from "@supabase/supabase-js";
+import { loadEnv } from "./load-env.mjs";
 
-const root = path.join(path.dirname(fileURLToPath(import.meta.url)), "..");
-const envPath = path.join(root, ".env.local");
 const days = Number(process.argv[2] ?? 13);
-
-function loadEnv() {
-  const vars = {};
-  for (const line of fs.readFileSync(envPath, "utf8").split(/\r?\n/)) {
-    const trimmed = line.trim();
-    if (!trimmed || trimmed.startsWith("#")) continue;
-    const eq = trimmed.indexOf("=");
-    if (eq === -1) continue;
-    vars[trimmed.slice(0, eq).trim()] = trimmed.slice(eq + 1).trim();
-  }
-  return vars;
-}
 
 function addDays(iso, n) {
   const [y, m, d] = iso.split("-").map(Number);
