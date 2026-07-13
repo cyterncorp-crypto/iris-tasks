@@ -16,8 +16,10 @@ Known accounts:
 - `andre@privify.com.br`
   - CLI username seen locally: `andre-8135`
   - Local profile: `$HOME/.vercel-accounts/privify`
-  - This account can see an empty/new `iris-tasks` project created by accidental relink.
-  - Do not deploy production from this account unless the project/env vars are intentionally configured.
+  - Vercel team/scope: `andres-projects-97d8ab21` (`team_zIdrZYy2Nho49wa8DXWJiWws`)
+  - This is the account/team associated with the original `.vercel/project.json` for this repo.
+  - As of 2026-07-13, this account also has an empty/new `iris-tasks` project created by accidental relink.
+  - Do not deploy production until project/env vars are intentionally configured or the original project is recovered.
 - `imandrelucas@gmail.com`
   - CLI username seen locally: `andrezaolucas`
   - Local profile: `$HOME/.vercel-accounts/imandrelucas`
@@ -35,28 +37,30 @@ cd /Users/andrelucas/code/iris-tasks
 git status --short --branch
 npm run build
 node scripts/verify-storage.mjs
-vercel --global-config "$HOME/.vercel-accounts/imandrelucas" whoami
-vercel --global-config "$HOME/.vercel-accounts/imandrelucas" env ls
+vercel --global-config "$HOME/.vercel-accounts/privify" whoami
+vercel --global-config "$HOME/.vercel-accounts/privify" projects ls
 ```
 
 Only deploy after confirming the account, project, and env vars:
 
 ```bash
-vercel --global-config "$HOME/.vercel-accounts/imandrelucas" deploy --prod --yes
+vercel --global-config "$HOME/.vercel-accounts/privify" deploy --prod --yes
 ```
 
 If Vercel asks to link the project, stop and verify the account first. A wrong relink can create a new empty `iris-tasks` project with no env vars.
 
-As of 2026-07-13, the original Iris Tasks / Sayyo Tasks production project was not found in either visible account:
+As of 2026-07-13, audit conclusion:
 
-- `andre@privify.com.br`
-- `imandrelucas@gmail.com`
+- `imandrelucas@gmail.com` does not list `iris-tasks`.
+- `andre@privify.com.br` is the matching account/team for this repo (`team_zIdrZYy2Nho49wa8DXWJiWws`).
+- The old local project id `prj_ztUoGZfeRwo0pMwV7HSNSljkcD7d` returns `Project not found` in the matching account, so it is stale/deleted/transferred.
+- The current visible `iris-tasks` project under `andre@privify.com.br` is `prj_lDe3d1JluQAGjAg7EBhGyYNdgUvY`, created on 2026-07-13 by accidental relink, with no deployments at creation time.
 
-Do not run production deploy until the correct Vercel project/account is identified or production env vars are intentionally recreated in a new project.
+Do not run production deploy until production env vars are intentionally recreated in the current project or the original project is recovered.
 
 Useful project references found during the 2026-07-13 audit:
 
 - GitHub repo: `https://github.com/cyterncorp-crypto/iris-tasks.git`
 - Old local Vercel project id from `.vercel/project.json`: `prj_ztUoGZfeRwo0pMwV7HSNSljkcD7d`
-- Empty/new project seen under `andre@privify.com.br`: `prj_lDe3d1JluQAGjAg7EBhGyYNdgUvY`
+- Current empty/new project under `andre@privify.com.br`: `prj_lDe3d1JluQAGjAg7EBhGyYNdgUvY`
 - Old URL checked: `https://iris-tasks-murex.vercel.app`
